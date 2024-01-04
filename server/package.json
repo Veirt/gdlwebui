@@ -1,11 +1,13 @@
 {
-  "name": "gdlwebui-server",
-  "module": "index.ts",
-  "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  }
+	"name": "gdlwebui-server",
+	"module": "index.ts",
+	"type": "module",
+	"author": "Veirt <veirt@duck.com>",
+	"license": "AGPL-3.0-or-later",
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
 }
