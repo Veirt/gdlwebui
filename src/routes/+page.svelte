@@ -101,7 +101,7 @@
 </script>
 
 <NavBar />
-<main class="flex h-screen justify-around flex-col md:flex-row">
+<main class="flex justify-around flex-col md:flex-row">
 	<section id="input-options" class="w-[40%]">
 		{#if error}
 			<h1>{error}</h1>
