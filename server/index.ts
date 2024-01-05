@@ -31,6 +31,8 @@ async function launchGalleryDl(ws: ServerWebSocket, data: { urls: string[] }) {
 		'output.mode=terminal',
 		'-o',
 		'output.progress=true',
+		'-o',
+		'output.shorten=false',
 		...data.urls
 	]);
 
