@@ -25,7 +25,7 @@ const server = Bun.serve({
 });
 
 async function launchGalleryDl(ws: ServerWebSocket, data: { urls: string[] }) {
-	ws.send('Starting download...\n');
+	ws.send(JSON.stringify({ output: 'Starting gallery-dl...\n' }));
 	const proc = spawn('gallery-dl', [
 		'-o',
 		'output.mode=terminal',
@@ -35,19 +35,28 @@ async function launchGalleryDl(ws: ServerWebSocket, data: { urls: string[] }) {
 	]);
 
 	// Listen for data from the child process stdout
-	proc.stdout.on('data', (data) => {
+	proc.stdout.on('data', (data: Buffer) => {
 		// Send the data to the WebSocket as a string
-		ws.send(data.toString());
+		let dataString = data.toString();
+		if (!dataString.endsWith('\n')) {
+			dataString += '\n';
+		}
+
+		ws.send(JSON.stringify({ output: dataString }));
 	});
 
-	proc.stderr.on('data', (data) => {
-		// TODO: handle progress (stderr) flooding the output log
-		console.log(data.toString());
-		// ws.send(data.toString());
+	// both error and progress will go to stderr.
+	proc.stderr.on('data', (data: Buffer) => {
+		let dataString = data.toString();
+		if (dataString.includes('error')) {
+			ws.send(JSON.stringify({ error: dataString }));
+		} else {
+			ws.send(JSON.stringify({ progress: data.toString() }));
+		}
 	});
 
-	proc.stdout.on('close', () => {
-		ws.send('Done.\n');
+	proc.on('close', (code) => {
+		ws.send(JSON.stringify({ output: `gallery-dl process exited with code: ${code}\n` }));
 	});
 }
 

@@ -4,15 +4,25 @@
 
 	let isSocketOpen = false;
 
-	let urls = '';
+	type Data = {
+		output?: string;
+		progress?: string;
+		error?: string;
+	};
 
+	let urls = '';
 	let error = '';
+	let output = '';
+
+	let progress = {
+		percentage: '',
+		downloadedSize: '',
+		downloadSpeed: ''
+	};
 
 	let data: { urls: string[] } = {
 		urls: []
 	};
-
-	let output = '';
 
 	let socket: WebSocket;
 	onMount(() => {
@@ -21,14 +31,31 @@
 			isSocketOpen = true;
 		});
 
-		socket.addEventListener('message', (event) => {
-			console.log(event.data);
-			output += event.data;
+		socket.addEventListener('message', (event: MessageEvent<string>) => {
+			const data: Data = JSON.parse(event.data);
+
+			if (data.output) {
+				output += data.output;
+			}
+
+			if (data.progress) {
+				// handle when the data comes many at once
+				const splitted = (data.progress as string).split('\n');
+				const lastData = splitted[splitted.length - 1].trim();
+
+				[progress.percentage, progress.downloadedSize, progress.downloadSpeed] = lastData
+					.split(' ')
+					.filter((data) => Boolean(data));
+			}
+
+			if (data.error) {
+				error = data.error;
+			}
 		});
 	});
 
 	function isUrlValid(urls: string) {
-		const urlArray = urls.split('\n');
+		const urlArray = urls.trimEnd().split('\n');
 
 		for (const url of urlArray) {
 			if (!url.startsWith('http')) {
@@ -44,6 +71,7 @@
 	function download() {
 		data.urls = [];
 		error = '';
+		progress = { percentage: '', downloadSpeed: '', downloadedSize: '' };
 		if (!isUrlValid(urls)) {
 			error = 'URL(s) is not valid.';
 			return;
@@ -53,6 +81,7 @@
 			action: 'download',
 			data
 		};
+
 		socket.send(JSON.stringify(message));
 	}
 </script>
@@ -79,5 +108,10 @@
 		<div id="output" class="mt-2 bg-gray-900 p-1 rounded h-96 whitespace-pre-line overflow-auto">
 			{output}
 		</div>
+		{#if progress.percentage}
+			<p class="text-2xl">Percentage: {progress.percentage}</p>
+			<p class="text-2xl">downloadedSize: {progress.downloadedSize}</p>
+			<p class="text-2xl">Speed: {progress.downloadSpeed}</p>
+		{/if}
 	</section>
 </main>
