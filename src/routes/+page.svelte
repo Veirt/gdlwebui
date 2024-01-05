@@ -29,6 +29,12 @@
 		urls: []
 	};
 
+	let outputElement: HTMLDivElement;
+	let isScrollToBottomActive = true;
+	const scrollToBottom = (node: HTMLDivElement) => {
+		node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
+	};
+
 	let socket: WebSocket;
 	onMount(() => {
 		socket = new WebSocket('ws://localhost:8080');
@@ -41,6 +47,9 @@
 
 			if (data.output) {
 				output += data.output;
+				if (isScrollToBottomActive) {
+					requestAnimationFrame(() => scrollToBottom(outputElement));
+				}
 			}
 
 			if (data.progress) {
@@ -98,7 +107,7 @@
 			<h1>{error}</h1>
 		{/if}
 		<form on:submit={download} class="flex flex-col">
-			<label class="text-gray-200 mb-2" for="url">URL(s)</label>
+			<label class="text-gray-200 mb-2 p-1" for="url">URL(s)</label>
 			<textarea bind:value={urls} class="bg-gray-700 p-2 rounded" id="url" cols="30" rows="10"
 			></textarea>
 			<button
@@ -110,8 +119,20 @@
 		</form>
 	</section>
 	<section id="output" class="w-1/2">
-		<label class="text-gray-200" for="output">Output</label>
+		<div class="flex justify-between">
+			<label class="text-gray-200" for="output">Output</label>
+			<button
+				class:bg-green-800={isScrollToBottomActive}
+				class:bg-gray-600={!isScrollToBottomActive}
+				on:click={() => {
+					isScrollToBottomActive = !isScrollToBottomActive;
+					if (isScrollToBottomActive) scrollToBottom(outputElement);
+				}}
+				class="p-1 px-2 rounded">Scroll to Bottom</button
+			>
+		</div>
 		<div
+			bind:this={outputElement}
 			id="output"
 			class="mt-2 bg-gray-900 p-1 rounded h-96 whitespace-pre overflow-auto overflow-x-scroll font-mono text-sm"
 		>
