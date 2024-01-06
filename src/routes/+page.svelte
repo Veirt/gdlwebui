@@ -101,8 +101,8 @@
 </script>
 
 <NavBar />
-<main class="flex justify-around flex-col md:flex-row">
-	<section id="input-options" class="w-[40%]">
+<main class="flex flex-col items-center md:flex-row md:justify-around md:items-start">
+	<section id="input-options" class="w-[90%] md:w-[40%]">
 		{#if error}
 			<div class="bg-red-800 p-1 rounded flex justify-between">
 				<p>{error}</p>
@@ -141,7 +141,7 @@
 			>
 		</form>
 	</section>
-	<section id="output" class="w-1/2">
+	<section id="output" class="w-[90%] my-5 md:mt-0 md:w-1/2">
 		<div class="flex justify-between">
 			<label class="text-gray-200" for="output">Output</label>
 			<button
