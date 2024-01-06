@@ -104,11 +104,11 @@
 <main class="flex flex-col items-center md:flex-row md:justify-around md:items-start">
 	<section id="input-options" class="w-[90%] md:w-[40%]">
 		{#if error}
-			<div class="bg-red-800 p-1 rounded flex justify-between">
+			<div class="flex justify-between p-1 bg-red-800 rounded">
 				<p>{error}</p>
 				<button on:click={() => (error = '')}>
 					<svg
-						class="fill-white cursor-pointer"
+						class="cursor-pointer fill-white"
 						xmlns="http://www.w3.org/2000/svg"
 						width="24px"
 						height="24px"
@@ -130,14 +130,14 @@
 			</div>
 		{/if}
 		<form on:submit={download} class="flex flex-col">
-			<label class="text-gray-200 mb-2 p-1" for="url">URL(s)</label>
-			<textarea bind:value={urls} class="bg-gray-700 p-2 rounded" id="url" cols="30" rows="10"
+			<label class="p-1 mb-2 text-gray-200" for="url">URL(s)</label>
+			<textarea bind:value={urls} class="p-2 bg-gray-700 rounded" id="url" cols="30" rows="10"
 			></textarea>
 			<button
 				class:loading={!isSocketOpen}
 				disabled={!isSocketOpen}
 				class:cursor-not-allowed={!isSocketOpen}
-				class="h-full bg-gray-900 p-2 rounded">Download</button
+				class="p-2 h-full bg-gray-900 rounded">Download</button
 			>
 		</form>
 	</section>
@@ -157,19 +157,19 @@
 		<div
 			bind:this={outputElement}
 			id="output"
-			class="mt-2 bg-gray-900 p-1 rounded h-96 whitespace-pre overflow-auto overflow-x-scroll font-mono text-sm"
+			class="overflow-auto overflow-x-scroll p-1 mt-2 h-96 font-mono text-sm whitespace-pre bg-gray-900 rounded"
 		>
 			{output}
 		</div>
 		{#if progress.downloadSpeed}
-			<div id="progress-bar" class="mt-5 bg-gray-700 h-8 relative">
+			<div id="progress-bar" class="relative mt-5 h-8 bg-gray-700">
 				<p class="text-center absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
 					{progress.percentage}%
 				</p>
 				<div
 					style="width: {$tweenedPercentage}%"
 					id="progress-percentage"
-					class="bg-gray-900 h-full"
+					class="h-full bg-gray-900"
 				></div>
 			</div>
 			<p class="text-xl">Downloaded: {progress.downloadedSize}</p>

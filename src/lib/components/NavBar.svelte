@@ -1,3 +1,3 @@
-<nav class="border-b border-b-gray-500 p-3 mb-5">
-	<h1 class="text-gray-50 font-bold text-3xl">gdlwebui</h1>
+<nav class="p-3 mb-5 border-b border-b-gray-500">
+	<h1 class="text-3xl font-bold text-gray-50">gdlwebui</h1>
 </nav>
