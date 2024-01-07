@@ -35,6 +35,10 @@
 	let socket: WebSocket;
 	onMount(() => {
 		socket = new WebSocket('ws://localhost:8080');
+		socket.addEventListener('error', () => {
+			error = "Can't connect to the server.";
+			return;
+		});
 		socket.addEventListener('open', () => {
 			isSocketOpen = true;
 		});
