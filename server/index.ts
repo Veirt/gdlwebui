@@ -1,5 +1,6 @@
 import { type ServerWebSocket } from 'bun';
 import { spawn } from 'child_process';
+import fs from 'fs';
 
 type Message = {
 	action: string;
@@ -24,17 +25,27 @@ const server = Bun.serve({
 	port: 8080
 });
 
+function isConfigPresent() {
+	return fs.existsSync('./gallery-dl.conf');
+}
+
 async function launchGalleryDl(ws: ServerWebSocket, data: { urls: string[] }) {
 	ws.send(JSON.stringify({ output: 'Starting gallery-dl...\n' }));
-	const proc = spawn('gallery-dl', [
+
+	const args = [
 		'-o',
 		'output.mode=terminal',
 		'-o',
 		'output.progress=true',
 		'-o',
-		'output.shorten=false',
-		...data.urls
-	]);
+		'output.shorten=false'
+	];
+	if (isConfigPresent()) {
+		args.push('-c');
+		args.push('./gallery-dl.conf');
+	}
+
+	const proc = spawn('gallery-dl', [...args, ...data.urls]);
 
 	// Listen for data from the child process stdout
 	proc.stdout.on('data', (data: Buffer) => {

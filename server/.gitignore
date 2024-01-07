@@ -175,3 +175,6 @@ dist
 .DS_Store
 
 gallery-dl
+gallery-dl.conf
+cookies/*
+!cookies/You can put your cookies here.txt
