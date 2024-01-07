@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import NavBar from '$lib/components/NavBar.svelte';
 	import { onMount } from 'svelte';
 	import { tweened } from 'svelte/motion';
+	import NavBar from '$lib/components/NavBar.svelte';
+	import UrlInput from '$lib/components/URLInput.svelte';
+	import Error from '$lib/components/Error.svelte';
+	import OutputLog from '$lib/components/OutputLog.svelte';
+	import Progress from '$lib/components/Progress.svelte';
 
 	let isSocketOpen = false;
 
@@ -12,7 +16,6 @@
 		error?: string;
 	};
 
-	let urls = '';
 	let error = '';
 	let output = '';
 
@@ -25,15 +28,9 @@
 	let tweenedPercentage = tweened(0);
 	$: if (browser) tweenedPercentage.set(progress.percentage);
 
-	let data: { urls: string[] } = {
-		urls: []
-	};
-
 	let outputElement: HTMLDivElement;
 	let isScrollToBottomActive = true;
-	const scrollToBottom = (node: HTMLDivElement) => {
-		node.scroll({ top: node.scrollHeight, behavior: 'smooth' });
-	};
+	let scrollToBottom: (node: HTMLDivElement) => void;
 
 	let socket: WebSocket;
 	onMount(() => {
@@ -69,31 +66,14 @@
 		});
 	});
 
-	function isUrlValid(urls: string) {
-		const urlArray = urls.trimEnd().split('\n');
-
-		for (const url of urlArray) {
-			// regex to validate url
-			if (!url.match(/(\w+:)?http?s:\/\/.*/)) return false;
-
-			data.urls.push(url.trim());
-		}
-
-		return true;
-	}
-
-	function download() {
-		data.urls = [];
-		error = '';
+	function download(e: CustomEvent<{ urls: string }>) {
 		progress = { percentage: 0, downloadSpeed: '', downloadedSize: '' };
-		if (!isUrlValid(urls)) {
-			error = 'URL(s) is not valid.';
-			return;
-		}
 
 		const message = {
 			action: 'download',
-			data
+			data: {
+				urls: e.detail.urls.split('\n')
+			}
 		};
 
 		socket.send(JSON.stringify(message));
@@ -102,78 +82,15 @@
 
 <NavBar />
 <main class="flex flex-col items-center md:flex-row md:justify-around md:items-start">
-	<section id="input-options" class="w-[90%] md:w-[40%]">
+	<section class="w-[90%] md:w-[40%]">
 		{#if error}
-			<div class="flex justify-between p-1 bg-red-800 rounded">
-				<p>{error}</p>
-				<button on:click={() => (error = '')}>
-					<svg
-						class="cursor-pointer fill-white"
-						xmlns="http://www.w3.org/2000/svg"
-						width="24px"
-						height="24px"
-						viewBox="0 0 24 24"
-						><g>
-							<path
-								d="M9.525,13.765c-0.46,0.46,0.25,1.17,0.71,0.71c0.59-0.59,1.175-1.18,1.765-1.76l1.765,1.76
-                    c0.46,0.46,1.17-0.25,0.71-0.71c-0.59-0.58-1.18-1.175-1.76-1.765c0.41-0.42,0.82-0.825,1.23-1.235c0.18-0.18,0.35-0.36,0.53-0.53
-                    c0.45-0.46-0.25-1.17-0.71-0.71L12,11.293l-1.765-1.768c-0.46-0.45-1.17,0.25-0.71,0.71L11.293,12L9.525,13.765z"
-							/>
-							<path
-								d="M12,21.933c-5.478,0-9.934-4.456-9.934-9.933S6.522,2.067,12,2.067S21.934,6.523,21.934,12
-                    S17.478,21.933,12,21.933z M12,3.067c-4.926,0-8.934,4.007-8.934,8.933S7.074,20.933,12,20.933s8.934-4.007,8.934-8.933
-                    S16.926,3.067,12,3.067z"
-							/>
-						</g></svg
-					>
-				</button>
-			</div>
+			<Error bind:message={error} />
 		{/if}
-		<form on:submit={download} class="flex flex-col">
-			<label class="p-1 mb-2 text-gray-200" for="url">URL(s)</label>
-			<textarea bind:value={urls} class="p-2 bg-gray-700 rounded" id="url" cols="30" rows="10"
-			></textarea>
-			<button
-				class:loading={!isSocketOpen}
-				disabled={!isSocketOpen}
-				class:cursor-not-allowed={!isSocketOpen}
-				class="p-2 h-full bg-gray-900 rounded">Download</button
-			>
-		</form>
+		<UrlInput on:download={download} bind:error {isSocketOpen} on:submit={download} />
 	</section>
+
 	<section id="output" class="w-[90%] my-5 md:mt-0 md:w-1/2">
-		<div class="flex justify-between">
-			<label class="text-gray-200" for="output">Output</label>
-			<button
-				class:bg-green-800={isScrollToBottomActive}
-				class:bg-gray-600={!isScrollToBottomActive}
-				on:click={() => {
-					isScrollToBottomActive = !isScrollToBottomActive;
-					if (isScrollToBottomActive) scrollToBottom(outputElement);
-				}}
-				class="p-1 px-2 rounded">Scroll to Bottom</button
-			>
-		</div>
-		<div
-			bind:this={outputElement}
-			id="output"
-			class="overflow-auto overflow-x-scroll p-1 mt-2 h-96 font-mono text-sm whitespace-pre bg-gray-900 rounded"
-		>
-			{output}
-		</div>
-		{#if progress.downloadSpeed}
-			<div id="progress-bar" class="relative mt-5 h-8 bg-gray-700">
-				<p class="text-center absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
-					{progress.percentage}%
-				</p>
-				<div
-					style="width: {$tweenedPercentage}%"
-					id="progress-percentage"
-					class="h-full bg-gray-900"
-				></div>
-			</div>
-			<p class="text-xl">Downloaded: {progress.downloadedSize}</p>
-			<p class="text-xl">Speed: {progress.downloadSpeed}</p>
-		{/if}
+		<OutputLog bind:outputElement bind:isScrollToBottomActive bind:scrollToBottom {output} />
+		<Progress bind:progress bind:tweenedPercentage />
 	</section>
 </main>
