@@ -39,7 +39,7 @@
 		if (dev) {
 			websocketUrl = 'ws://localhost:8080';
 		} else {
-			websocketUrl = `ws://${window.location.hostname}/ws`;
+			websocketUrl = `ws://${window.location.host}/ws`;
 		}
 		socket = new WebSocket(websocketUrl);
 		socket.addEventListener('error', () => {
