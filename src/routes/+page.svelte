@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { tweened } from 'svelte/motion';
-	import { PUBLIC_WEBSOCKET_URL } from '$env/static/public';
+	import { dev } from '$app/environment';
 	import NavBar from '$lib/components/NavBar.svelte';
 	import UrlInput from '$lib/components/URLInput.svelte';
 	import Error from '$lib/components/Error.svelte';
@@ -35,7 +35,12 @@
 
 	let socket: WebSocket;
 	onMount(() => {
-		const websocketUrl = PUBLIC_WEBSOCKET_URL || 'ws://localhost:8080';
+		let websocketUrl;
+		if (dev) {
+			websocketUrl = 'ws://localhost:8080';
+		} else {
+			websocketUrl = `ws://${window.location.hostname}/ws`;
+		}
 		socket = new WebSocket(websocketUrl);
 		socket.addEventListener('error', () => {
 			error = "Can't connect to the server.";

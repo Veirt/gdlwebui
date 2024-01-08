@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  gdlwebui-client:
+    container_name: gdlwebui-client
+    build: .
+    ports:
+      - 80:80
+    restart: unless-stopped
+  gdlwebui-server:
+    container_name: gdlwebui-server
+    volumes:
+      - ./gallery-dl:/usr/src/app/gallery-dl
+      # - path/to/gallery-dl.conf:/usr/src/app/gallery-dl.conf # optional
+      # - path/to/cookies/directory:/usr/src/app/cookies # optional
+    build: server/.
+    restart: unless-stopped
