@@ -30,9 +30,11 @@ COPY --from=prerelease /usr/src/app/index.ts .
 COPY --from=prerelease /usr/src/app/package.json .
 
 # install gallery-dl
-RUN apk update --no-cache && apk add --no-cache gallery-dl && \
+RUN apk update --no-cache && apk add --no-cache gallery-dl runuser && \
     rm -rf /var/cache/apk/*
 
 # run the app
-ENTRYPOINT [ "bun", "run", "index.ts" ]
+COPY docker/entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
+CMD [ "bun", "run", "index.ts" ]
 
