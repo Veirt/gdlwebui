@@ -11,7 +11,12 @@ services:
     container_name: gdlwebui-server
     volumes:
       - ./gallery-dl:/usr/src/app/gallery-dl
-      # - path/to/gallery-dl.conf:/usr/src/app/gallery-dl.conf # optional
+
+      # optional
+      # - type: bind
+      #   source: path/to/gallery-dl.conf
+      #   target: /usr/src/app/gallery-dl.conf
+
       # - path/to/cookies/directory:/usr/src/app/cookies # optional
     build: server/.
     restart: unless-stopped
