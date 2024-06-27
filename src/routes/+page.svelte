@@ -9,7 +9,7 @@
 	import OutputLog from '$lib/components/OutputLog.svelte';
 	import Progress from '$lib/components/Progress.svelte';
 
-	let isSocketOpen = false;
+	let isSocketOpen = $state(false);
 
 	type Data = {
 		output?: string;
@@ -17,20 +17,22 @@
 		error?: string;
 	};
 
-	let error = '';
-	let output = '';
+	let error = $state('');
+	let output = $state('');
 
-	let progress = {
+	let progress = $state({
 		percentage: 0,
 		downloadedSize: '',
 		downloadSpeed: ''
-	};
+	});
 
-	let tweenedPercentage = tweened(0);
-	$: if (browser) tweenedPercentage.set(progress.percentage);
+	let tweenedPercentage = $state(tweened(0));
+	$effect(() => {
+		if (browser) tweenedPercentage.set(progress.percentage);
+	});
 
 	let outputElement: HTMLDivElement;
-	let isScrollToBottomActive = true;
+	let isScrollToBottomActive = $state(true);
 	let scrollToBottom: (node: HTMLDivElement) => void;
 
 	let socket: WebSocket;
